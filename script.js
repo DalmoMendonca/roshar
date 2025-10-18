@@ -1,5 +1,7 @@
 // Configuration - Get API key from config
-const OPENAI_API_KEY = window.CONFIG ? window.CONFIG.OPENAI_API_KEY : '';
+const OPENAI_API_KEY = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.OPENAI_API_KEY) 
+    ? window.CONFIG.OPENAI_API_KEY 
+    : '';
 
 // API URLs - Using current Responses API
 const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
