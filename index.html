@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roshar Character Creator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+        rel="stylesheet">
+    <script src="config.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <button class="help-button" id="helpButton">?</button>
+            <h1 class="title">Welcome to Roshar</h1>
+            <p class="subtitle">Character Bio Generator for the Cosmere RPG</p>
+        </header>
+
+        <div class="form-container">
+            <!-- Character Sheet Section -->
+            <section class="character-sheet">
+                <h2>Character Sheet</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="playerName">Player Name</label>
+                        <input type="text" id="playerName" name="playerName">
+                    </div>
+                    <div class="form-group">
+                        <label for="characterName">Character Name</label>
+                        <input type="text" id="characterName" name="characterName">
+                    </div>
+                    <div class="form-group">
+                        <label for="level">Level</label>
+                        <input type="number" id="level" name="level" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="ancestry">Ancestry</label>
+                        <input type="text" id="ancestry" name="ancestry">
+                    </div>
+                    <div class="form-group">
+                        <label for="sex">Sex</label>
+                        <select id="sex" name="sex">
+                            <option value="">Select...</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h3>Attributes</h3>
+                <div class="attributes-grid">
+                    <div class="form-group">
+                        <label for="strength">Strength</label>
+                        <input type="number" id="strength" name="strength">
+                    </div>
+                    <div class="form-group">
+                        <label for="speed">Speed</label>
+                        <input type="number" id="speed" name="speed">
+                    </div>
+                    <div class="form-group">
+                        <label for="intellect">Intellect</label>
+                        <input type="number" id="intellect" name="intellect">
+                    </div>
+                    <div class="form-group">
+                        <label for="willpower">Willpower</label>
+                        <input type="number" id="willpower" name="willpower">
+                    </div>
+                    <div class="form-group">
+                        <label for="awareness">Awareness</label>
+                        <input type="number" id="awareness" name="awareness">
+                    </div>
+                    <div class="form-group">
+                        <label for="presence">Presence</label>
+                        <input type="number" id="presence" name="presence">
+                    </div>
+                </div>
+
+                <h3>Stats</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="health">Health</label>
+                        <input type="number" id="health" name="health">
+                    </div>
+                    <div class="form-group">
+                        <label for="focus">Focus</label>
+                        <input type="number" id="focus" name="focus">
+                    </div>
+                    <div class="form-group">
+                        <label for="marks">Marks</label>
+                        <input type="number" id="marks" name="marks">
+                    </div>
+                    <div class="form-group">
+                        <label for="liftingCapacity">Lifting Capacity</label>
+                        <input type="text" id="liftingCapacity" name="liftingCapacity">
+                    </div>
+                    <div class="form-group">
+                        <label for="movement">Movement</label>
+                        <input type="text" id="movement" name="movement">
+                    </div>
+                    <div class="form-group">
+                        <label for="recoveryDie">Recovery Die</label>
+                        <input type="text" id="recoveryDie" name="recoveryDie">
+                    </div>
+                    <div class="form-group">
+                        <label for="sensesRange">Senses Range</label>
+                        <input type="text" id="sensesRange" name="sensesRange">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="conditionsInjuries">Conditions & Injuries</label>
+                    <input type="text" id="conditionsInjuries" name="conditionsInjuries">
+                </div>
+                <div class="form-group">
+                    <label for="expertises">Expertises</label>
+                    <input type="text" id="expertises" name="expertises">
+                </div>
+                <div class="form-group">
+                    <label for="talents">Talents</label>
+                    <input type="text" id="talents" name="talents">
+                </div>
+
+                <div class="form-group">
+                    <label for="weapons">Weapons</label>
+                    <textarea id="weapons" name="weapons" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="armorEquipment">Armor & Equipment</label>
+                    <textarea id="armorEquipment" name="armorEquipment" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="connections">Connections</label>
+                    <textarea id="connections" name="connections" rows="3"></textarea>
+                </div>
+            </section>
+
+            <!-- Character Bio Section -->
+            <section class="character-bio">
+                <h2>Character Bio</h2>
+
+                <div class="form-group">
+                    <label for="appearance">Appearance</label>
+                    <textarea id="appearance" name="appearance" rows="4" class="bio-field"></textarea>
+                    <div class="ai-indicator" id="appearance-indicator"></div>
+                    <div class="version-controls" id="appearance-versions" style="display: none;">
+                        <button type="button" class="version-prev" id="appearance-prev">‹</button>
+                        <span class="version-counter" id="appearance-counter">1/1</span>
+                        <button type="button" class="version-next" id="appearance-next">›</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="background">Background</label>
+                    <textarea id="background" name="background" rows="4" class="bio-field"></textarea>
+                    <div class="ai-indicator" id="background-indicator"></div>
+                    <div class="version-controls" id="background-versions" style="display: none;">
+                        <button type="button" class="version-prev" id="background-prev">‹</button>
+                        <span class="version-counter" id="background-counter">1/1</span>
+                        <button type="button" class="version-next" id="background-next">›</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="personality">Personality</label>
+                    <textarea id="personality" name="personality" rows="4" class="bio-field"></textarea>
+                    <div class="ai-indicator" id="personality-indicator"></div>
+                    <div class="version-controls" id="personality-versions" style="display: none;">
+                        <button type="button" class="version-prev" id="personality-prev">‹</button>
+                        <span class="version-counter" id="personality-counter">1/1</span>
+                        <button type="button" class="version-next" id="personality-next">›</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="affiliations">Affiliations</label>
+                    <textarea id="affiliations" name="affiliations" rows="3" class="bio-field"></textarea>
+                    <div class="ai-indicator" id="affiliations-indicator"></div>
+                    <div class="version-controls" id="affiliations-versions" style="display: none;">
+                        <button type="button" class="version-prev" id="affiliations-prev">‹</button>
+                        <span class="version-counter" id="affiliations-counter">1/1</span>
+                        <button type="button" class="version-next" id="affiliations-next">›</button>
+                    </div>
+                </div>
+
+                <h3>Roleplaying</h3>
+
+                <div class="form-group">
+                    <label for="catchphrase">Catchphrase</label>
+                    <input type="text" id="catchphrase" name="catchphrase" class="bio-field">
+                    <div class="ai-indicator" id="catchphrase-indicator"></div>
+                    <div class="version-controls" id="catchphrase-versions" style="display: none;">
+                        <button type="button" class="version-prev" id="catchphrase-prev">‹</button>
+                        <span class="version-counter" id="catchphrase-counter">1/1</span>
+                        <button type="button" class="version-next" id="catchphrase-next">›</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="languageQuirks">Language Quirks</label>
+                    <textarea id="languageQuirks" name="languageQuirks" rows="3" class="bio-field"></textarea>
+                    <div class="ai-indicator" id="languageQuirks-indicator"></div>
+                    <div class="version-controls" id="languageQuirks-versions" style="display: none;">
+                        <button type="button" class="version-prev" id="languageQuirks-prev">‹</button>
+                        <span class="version-counter" id="languageQuirks-counter">1/1</span>
+                        <button type="button" class="version-next" id="languageQuirks-next">›</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="superstitions">Superstitions</label>
+                    <textarea id="superstitions" name="superstitions" rows="3" class="bio-field"></textarea>
+                    <div class="ai-indicator" id="superstitions-indicator"></div>
+                    <div class="version-controls" id="superstitions-versions" style="display: none;">
+                        <button type="button" class="version-prev" id="superstitions-prev">‹</button>
+                        <span class="version-counter" id="superstitions-counter">1/1</span>
+                        <button type="button" class="version-next" id="superstitions-next">›</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="diet">Diet</label>
+                    <textarea id="diet" name="diet" rows="2" class="bio-field"></textarea>
+                    <div class="ai-indicator" id="diet-indicator"></div>
+                    <div class="version-controls" id="diet-versions" style="display: none;">
+                        <button type="button" class="version-prev" id="diet-prev">‹</button>
+                        <span class="version-counter" id="diet-counter">1/1</span>
+                        <button type="button" class="version-next" id="diet-next">›</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="secrets">Secrets</label>
+                    <textarea id="secrets" name="secrets" rows="3" class="bio-field"></textarea>
+                    <div class="ai-indicator" id="secrets-indicator"></div>
+                    <div class="version-controls" id="secrets-versions" style="display: none;">
+                        <button type="button" class="version-prev" id="secrets-prev">‹</button>
+                        <span class="version-counter" id="secrets-counter">1/1</span>
+                        <button type="button" class="version-next" id="secrets-next">›</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="characterFlaws">Character Flaws</label>
+                    <textarea id="characterFlaws" name="characterFlaws" rows="3" class="bio-field"></textarea>
+                    <div class="ai-indicator" id="characterFlaws-indicator"></div>
+                    <div class="version-controls" id="characterFlaws-versions" style="display: none;">
+                        <button type="button" class="version-prev" id="characterFlaws-prev">‹</button>
+                        <span class="version-counter" id="characterFlaws-counter">1/1</span>
+                        <button type="button" class="version-next" id="characterFlaws-next">›</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="whatExcites">What Excites the Character</label>
+                    <textarea id="whatExcites" name="whatExcites" rows="3" class="bio-field"></textarea>
+                    <div class="ai-indicator" id="whatExcites-indicator"></div>
+                    <div class="version-controls" id="whatExcites-versions" style="display: none;">
+                        <button type="button" class="version-prev" id="whatExcites-prev">‹</button>
+                        <span class="version-counter" id="whatExcites-counter">1/1</span>
+                        <button type="button" class="version-next" id="whatExcites-next">›</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="dynamicGoals">Dynamic Character Goals</label>
+                    <textarea id="dynamicGoals" name="dynamicGoals" rows="4" class="bio-field"></textarea>
+                    <div class="ai-indicator" id="dynamicGoals-indicator"></div>
+                    <div class="version-controls" id="dynamicGoals-versions" style="display: none;">
+                        <button type="button" class="version-prev" id="dynamicGoals-prev">‹</button>
+                        <span class="version-counter" id="dynamicGoals-counter">1/1</span>
+                        <button type="button" class="version-next" id="dynamicGoals-next">›</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="mostWant">What do I MOST want?</label>
+                    <textarea id="mostWant" name="mostWant" rows="3" class="bio-field"></textarea>
+                    <div class="ai-indicator" id="mostWant-indicator"></div>
+                    <div class="version-controls" id="mostWant-versions" style="display: none;">
+                        <button type="button" class="version-prev" id="mostWant-prev">‹</button>
+                        <span class="version-counter" id="mostWant-counter">1/1</span>
+                        <button type="button" class="version-next" id="mostWant-next">›</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="wontDo">What WON'T I do to get what I most want?</label>
+                    <textarea id="wontDo" name="wontDo" rows="3" class="bio-field"></textarea>
+                    <div class="ai-indicator" id="wontDo-indicator"></div>
+                    <div class="version-controls" id="wontDo-versions" style="display: none;">
+                        <button type="button" class="version-prev" id="wontDo-prev">‹</button>
+                        <span class="version-counter" id="wontDo-counter">1/1</span>
+                        <button type="button" class="version-next" id="wontDo-next">›</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="actions">
+            <button id="generateBio" class="btn btn-primary">Generate Bio</button>
+            <button id="generateImage" class="btn btn-primary" style="display: none;">Generate Image</button>
+            <button id="downloadBio" class="btn btn-primary" style="display: none;">Download Bio</button>
+        </div>
+
+
+
+        <div class="image-container" id="imageContainer" style="display: none;">
+            <div class="image-display">
+                <img id="characterImage" alt="Character Portrait">
+            </div>
+            <div class="image-refinement" id="imageRefinement">
+                <h3>Refine Your Portrait</h3>
+                <div class="refinement-inputs">
+                    <div class="form-group">
+                        <label for="imageInstructions">Additional Instructions</label>
+                        <textarea id="imageInstructions" placeholder="e.g., 'make the eyes more blue', 'add a scar on the left cheek', 'make them look more serious'" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="referenceImage">Reference Photo (optional)</label>
+                        <input type="file" id="referenceImage" accept="image/*">
+                        <small>Upload a photo to make the character resemble this person</small>
+                    </div>
+                    <button id="refineImage" class="btn btn-secondary">Refine Image</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="modal-overlay" id="helpModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Character Creator</h2>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>This AI-powered tool helps you create detailed, lore-accurate character bios for the
+                    <strong>Cosmere RPG</strong>. Perfect for brand new players who want rich backstories that fit authentically into Brandon Sanderson's world of Roshar.
+                </p>
+                <ol>
+                    <li><strong>Fill out your character sheet.</strong> Add as much or as little as you want (name, stats, equipment, etc.)</li>
+                    <li><strong>Add any existing bio details.</strong> Pre-fill fields you already have ideas for, or leave them blank if you want </li>
+                    <li><strong>Click Generate Bio.</strong> Out trained AI creates detailed, Roshar-appropriate content using official worldbuilding based on all you've entered.</li>
+                    <li><strong>Review & edit.</strong> Fields with green backgrounds were updated by AI. Use the ↻ button to cycle through previous versions.</li>
+                    <li><strong>Generate a portrait.</strong> Optional. Create D&D-style character art that fits the Roshar aesthetic.</li>
+                    <li><strong>Download your bio.</strong> Get a beautifully formatted PDF with your complete character. Keep a copy for your reference as you roleplay, and send a copy to your GM—they'll appreciate it!</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
