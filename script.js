@@ -1,4 +1,4 @@
-// Configuration - Get API key from config
+// Configuration - Get API key from config (set by build process or local dev)
 const OPENAI_API_KEY = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.OPENAI_API_KEY) 
     ? window.CONFIG.OPENAI_API_KEY 
     : '';
