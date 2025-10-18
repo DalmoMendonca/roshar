@@ -4,7 +4,7 @@
   "description": "AI-powered character creator for the Cosmere RPG",
   "main": "index.html",
   "scripts": {
-    "build": "node build-config.js"
+    "start": "python -m http.server 8000"
   },
   "author": "dalmomendonca@gmail.com",
   "license": "MIT"
