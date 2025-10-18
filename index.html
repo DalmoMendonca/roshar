@@ -9,7 +9,20 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
         rel="stylesheet">
-    <script src="config.js"></script>
+    <script>
+        // Dynamically load config.js only if it exists (for local development)
+        fetch('config.js')
+            .then(response => {
+                if (response.ok) {
+                    const script = document.createElement('script');
+                    script.src = 'config.js';
+                    document.head.appendChild(script);
+                }
+            })
+            .catch(() => {
+                // config.js doesn't exist, that's fine for production
+            });
+    </script>
 </head>
 
 <body>
@@ -317,7 +330,9 @@
                 <div class="refinement-inputs">
                     <div class="form-group">
                         <label for="imageInstructions">Additional Instructions</label>
-                        <textarea id="imageInstructions" placeholder="e.g., 'make the eyes more blue', 'add a scar on the left cheek', 'make them look more serious'" rows="2"></textarea>
+                        <textarea id="imageInstructions"
+                            placeholder="e.g., 'make the eyes more blue', 'add a scar on the left cheek', 'make them look more serious'"
+                            rows="2"></textarea>
                     </div>
                     <div class="form-group">
                         <label for="referenceImage">Reference Photo (optional)</label>
@@ -339,15 +354,23 @@
             </div>
             <div class="modal-body">
                 <p>This AI-powered tool helps you create detailed, lore-accurate character bios for the
-                    <strong>Cosmere RPG</strong>. Perfect for brand new players who want rich backstories that fit authentically into Brandon Sanderson's world of Roshar.
+                    <strong>Cosmere RPG</strong>. Perfect for brand new players who want rich backstories that fit
+                    authentically into Brandon Sanderson's world of Roshar.
                 </p>
                 <ol>
-                    <li><strong>Fill out your character sheet.</strong> Add as much or as little as you want (name, stats, equipment, etc.)</li>
-                    <li><strong>Add any existing bio details.</strong> Pre-fill fields you already have ideas for, or leave them blank if you want </li>
-                    <li><strong>Click Generate Bio.</strong> Out trained AI creates detailed, Roshar-appropriate content using official worldbuilding based on all you've entered.</li>
-                    <li><strong>Review & edit.</strong> Fields with green backgrounds were updated by AI. Use the ↻ button to cycle through previous versions.</li>
-                    <li><strong>Generate a portrait.</strong> Optional. Create D&D-style character art that fits the Roshar aesthetic.</li>
-                    <li><strong>Download your bio.</strong> Get a beautifully formatted PDF with your complete character. Keep a copy for your reference as you roleplay, and send a copy to your GM—they'll appreciate it!</li>
+                    <li><strong>Fill out your character sheet.</strong> Add as much or as little as you want (name,
+                        stats, equipment, etc.)</li>
+                    <li><strong>Add any existing bio details.</strong> Pre-fill fields you already have ideas for, or
+                        leave them blank if you want </li>
+                    <li><strong>Click Generate Bio.</strong> Out trained AI creates detailed, Roshar-appropriate content
+                        using official worldbuilding based on all you've entered.</li>
+                    <li><strong>Review & edit.</strong> Fields with green backgrounds were updated by AI. Use the ↻
+                        button to cycle through previous versions.</li>
+                    <li><strong>Generate a portrait.</strong> Optional. Create D&D-style character art that fits the
+                        Roshar aesthetic.</li>
+                    <li><strong>Download your bio.</strong> Get a beautifully formatted PDF with your complete
+                        character. Keep a copy for your reference as you roleplay, and send a copy to your GM—they'll
+                        appreciate it!</li>
                 </ol>
             </div>
         </div>
