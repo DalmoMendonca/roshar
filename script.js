@@ -1,7 +1,24 @@
-// Configuration - Get API key from config (set by build process or local dev)
-const OPENAI_API_KEY = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.OPENAI_API_KEY) 
-    ? window.CONFIG.OPENAI_API_KEY 
-    : '';
+// Configuration - Get API key from Netlify function or local config
+let OPENAI_API_KEY = '';
+
+// Initialize API key
+async function initializeAPIKey() {
+    // Try local config first (for development)
+    if (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.OPENAI_API_KEY) {
+        OPENAI_API_KEY = window.CONFIG.OPENAI_API_KEY;
+        return;
+    }
+    
+    // Try Netlify function (for production)
+    try {
+        const response = await fetch('/.netlify/functions/get-api-key');
+        const data = await response.json();
+        OPENAI_API_KEY = data.apiKey || '';
+    } catch (error) {
+        console.error('Failed to get API key:', error);
+        OPENAI_API_KEY = '';
+    }
+}
 
 // API URLs - Using current Responses API
 const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
@@ -221,6 +238,11 @@ async function uploadRosharPDF() {
 
 // Generate character bio using OpenAI Responses API
 async function generateBio() {
+    // Initialize API key if not already done
+    if (!OPENAI_API_KEY) {
+        await initializeAPIKey();
+    }
+    
     if (!OPENAI_API_KEY) {
         alert('API key not configured. Please set your OpenAI API key in the script.');
         return;
@@ -571,6 +593,11 @@ function updateBioFields(bioData) {
 
 // Generate character image using GPT-Image-1 via Responses API
 async function generateImage() {
+    // Initialize API key if not already done
+    if (!OPENAI_API_KEY) {
+        await initializeAPIKey();
+    }
+    
     if (!OPENAI_API_KEY) {
         alert('API key not configured. Please set your OpenAI API key in the script.');
         return;
@@ -653,6 +680,11 @@ function createImagePrompt(formData, additionalInstructions = '', hasReference =
 
 // Refine existing image
 async function refineImage() {
+    // Initialize API key if not already done
+    if (!OPENAI_API_KEY) {
+        await initializeAPIKey();
+    }
+    
     if (!OPENAI_API_KEY) {
         alert('API key not configured. Please set your OpenAI API key in the script.');
         return;
