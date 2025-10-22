@@ -31,6 +31,12 @@
             <button class="help-button" id="helpButton">?</button>
             <h1 class="title">Welcome to Roshar</h1>
             <p class="subtitle">Character Bio Generator for the Cosmere RPG</p>
+            <div id="aiProgress" class="ai-progress" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <small class="progress-text">AI Agent researching Stormlight lore...</small>
+            </div>
         </header>
 
         <div class="form-container">
@@ -148,6 +154,39 @@
                 <div class="form-group">
                     <label for="connections">Connections</label>
                     <textarea id="connections" name="connections" rows="3"></textarea>
+                </div>
+                <div class="form-group alignment-group">
+                    <label>Character Alignment</label>
+                    <div class="alignment-grid" id="alignmentGrid">
+                        <div class="alignment-tile" data-alignment="lawful-good">
+                            <div class="alignment-label">Lawful Good</div>
+                        </div>
+                        <div class="alignment-tile" data-alignment="neutral-good">
+                            <div class="alignment-label">Neutral Good</div>
+                        </div>
+                        <div class="alignment-tile" data-alignment="chaotic-good">
+                            <div class="alignment-label">Chaotic Good</div>
+                        </div>
+                        <div class="alignment-tile" data-alignment="lawful-neutral">
+                            <div class="alignment-label">Lawful Neutral</div>
+                        </div>
+                        <div class="alignment-tile" data-alignment="true-neutral">
+                            <div class="alignment-label">True Neutral</div>
+                        </div>
+                        <div class="alignment-tile" data-alignment="chaotic-neutral">
+                            <div class="alignment-label">Chaotic Neutral</div>
+                        </div>
+                        <div class="alignment-tile" data-alignment="lawful-evil">
+                            <div class="alignment-label">Lawful Evil</div>
+                        </div>
+                        <div class="alignment-tile" data-alignment="neutral-evil">
+                            <div class="alignment-label">Neutral Evil</div>
+                        </div>
+                        <div class="alignment-tile" data-alignment="chaotic-evil">
+                            <div class="alignment-label">Chaotic Evil</div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="alignment" name="alignment" value="">
                 </div>
             </section>
 
@@ -377,7 +416,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="script.js"></script>
+    <script src="script.js?v=11"></script>
 </body>
 
 </html>

@@ -8,7 +8,7 @@ async function initializeAPIKey() {
         OPENAI_API_KEY = window.CONFIG.OPENAI_API_KEY;
         return;
     }
-    
+
     // Try Netlify function (for production)
     try {
         const response = await fetch('/.netlify/functions/get-api-key');
@@ -158,6 +158,34 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// Initialize alignment grid
+const alignmentGrid = document.getElementById('alignmentGrid');
+const alignmentInput = document.getElementById('alignment');
+
+if (alignmentGrid && alignmentInput) {
+    alignmentGrid.addEventListener('click', (e) => {
+        const tile = e.target.closest('.alignment-tile');
+        if (!tile) return;
+
+        const alignment = tile.dataset.alignment;
+        const isSelected = tile.classList.contains('selected');
+
+        // Clear all selections
+        alignmentGrid.querySelectorAll('.alignment-tile').forEach(t => {
+            t.classList.remove('selected');
+        });
+
+        // If it wasn't selected, select it
+        if (!isSelected) {
+            tile.classList.add('selected');
+            alignmentInput.value = alignment;
+        } else {
+            // If it was selected, unselect it
+            alignmentInput.value = '';
+        }
+    });
+}
+
 // Initialize version controls and field tracking
 BIO_FIELDS.forEach(field => {
     const element = document.getElementById(field);
@@ -185,7 +213,7 @@ function collectFormData() {
 
     // Character Sheet fields
     const characterSheetFields = [
-        'playerName', 'characterName', 'sex', 'level', 'ancestry',
+        'playerName', 'characterName', 'sex', 'level', 'ancestry', 'alignment',
         'strength', 'speed', 'intellect', 'willpower', 'awareness', 'presence',
         'health', 'focus', 'marks', 'liftingCapacity', 'movement', 'recoveryDie',
         'sensesRange', 'conditionsInjuries', 'expertises', 'talents',
@@ -206,35 +234,8 @@ function collectFormData() {
     return formData;
 }
 
-// Upload and process the Roshar PDF for worldbuilding context
-async function uploadRosharPDF() {
-    try {
-        const response = await fetch('Welcome to Roshar.pdf');
-        const pdfBlob = await response.blob();
-
-        const formData = new FormData();
-        formData.append('file', pdfBlob, 'Welcome to Roshar.pdf');
-        formData.append('purpose', 'user_data');
-
-        const uploadResponse = await fetch(OPENAI_FILES_URL, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${OPENAI_API_KEY}`
-            },
-            body: formData
-        });
-
-        if (!uploadResponse.ok) {
-            throw new Error(`File upload failed: ${uploadResponse.status}`);
-        }
-
-        const fileData = await uploadResponse.json();
-        return fileData.id;
-    } catch (error) {
-        console.error('Error uploading PDF:', error);
-        return null;
-    }
-}
+// Upload the Welcome to Roshar PDF (the only one under 32MB limit)
+// Note: Using pre-uploaded file ID to avoid repeated uploads
 
 // Generate character bio using OpenAI Responses API
 async function generateBio() {
@@ -242,7 +243,7 @@ async function generateBio() {
     if (!OPENAI_API_KEY) {
         await initializeAPIKey();
     }
-    
+
     if (!OPENAI_API_KEY) {
         alert('API key not configured. Please set your OpenAI API key in the script.');
         return;
@@ -252,7 +253,56 @@ async function generateBio() {
 
     // Show loading state and lock all fields
     generateBioBtn.disabled = true;
-    generateBioBtn.textContent = 'Generating...';
+
+    // Show progress indicator
+    const progressIndicator = document.getElementById('aiProgress');
+    const progressFill = progressIndicator.querySelector('.progress-fill');
+    const progressText = progressIndicator.querySelector('.progress-text');
+    progressIndicator.style.display = 'block';
+
+    // Start progress animation with time tracking
+    let progressDots = 0;
+    let elapsedSeconds = 0;
+    const startTime = Date.now();
+    const progressMessages = [
+        'Researching Roshar lore',
+        'Analyzing cultural backgrounds',
+        'Exploring social structures',
+        'Mapping regional details',
+        'Investigating historical events',
+        'Crafting character elements',
+        'Synthesizing final details'
+    ];
+    let messageIndex = 0;
+
+    const updateProgress = () => {
+        progressDots = (progressDots + 1) % 4;
+        const dots = '.'.repeat(progressDots);
+        const spaces = '\u00A0'.repeat(3 - progressDots);
+
+        elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+        const timeDisplay = elapsedSeconds < 60 ? `${elapsedSeconds}s` : `${Math.floor(elapsedSeconds / 60)}m ${elapsedSeconds % 60}s`;
+
+        // Simulate progress (reaches ~80% after 10 minutes, then slows down)
+        const progressPercent = Math.min(95, (elapsedSeconds / 600) * 80 + (elapsedSeconds > 600 ? (elapsedSeconds - 600) / 1800 * 15 : 0));
+
+        generateBioBtn.textContent = 'Generating...';
+        progressFill.style.width = `${progressPercent}%`;
+        progressText.textContent = `${progressMessages[messageIndex]} - ${timeDisplay}`;
+    };
+
+    // Update dots every 500ms, message every 4 seconds
+    const dotInterval = setInterval(updateProgress, 500);
+    const messageInterval = setInterval(() => {
+        messageIndex = (messageIndex + 1) % progressMessages.length;
+    }, 4000);
+
+    // Store intervals for cleanup
+    generateBioBtn.dotInterval = dotInterval;
+    generateBioBtn.messageInterval = messageInterval;
+
+    // Start immediately
+    updateProgress();
 
     // Lock all bio fields during generation
     BIO_FIELDS.forEach(field => {
@@ -264,46 +314,149 @@ async function generateBio() {
     });
 
     try {
-        // Upload the Roshar PDF for worldbuilding context
-        const pdfFileId = await uploadRosharPDF();
+        // Use the pre-uploaded Welcome to Roshar PDF file
+        const pdfFileIds = ['file-3VQDhPG6m61qHiGuwfFZ2x'];
 
-        // Create the input for the AI using Responses API format
-        const input = createBioInput(formData, pdfFileId);
+        console.log('🚀 Initializing Enhanced AI Agent with:');
+        console.log('📚 Vector Store: vs_68f837113fb481918c561f76853b87be (3 large PDFs)');
+        console.log('📄 Direct File: file-3VQDhPG6m61qHiGuwfFZ2x (Welcome to Roshar)');
+        console.log('🧠 Reasoning Level: Medium');
+        console.log('🔍 Max Search Results: 15');
 
-        const response = await fetch(OPENAI_RESPONSES_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${OPENAI_API_KEY}`
-            },
-            body: JSON.stringify({
-                model: 'gpt-5',
-                input: input,
-                instructions: `You are an expert in the Cosmere universe, specifically the world of Roshar from Brandon Sanderson's Stormlight Archive series. You're helping create detailed character bios for brand new characters in a Stormlight TTRPG campaign. These characters have never used stormlight nor been approached by a Spren for a nahel bond.
+        // Update button text to show research phase
+        generateBioBtn.textContent = 'Researching...';
 
-Use the provided "Welcome to Roshar" document as your primary reference for worldbuilding accuracy. Create rich, detailed character backgrounds that feel authentic to this world. Consider the character's social status, cultural background, relationship to the various kingdoms and their customs, and how they might fit into the broader conflicts and themes of Roshar.
+        // Create the input for the enhanced agentic AI using Responses API format
+        const input = createEnhancedBioInput(formData, pdfFileIds);
 
-IMPORTANT: Return ONLY a valid JSON object. Do not include any markdown formatting, code blocks, or additional text. Ensure all quotes within string values are properly escaped or use single quotes to avoid JSON parsing errors.
+        // Debug: Log the input structure
+        console.log('📝 API Input structure:', JSON.stringify(input, null, 2));
 
-Return your response as a JSON object with the following structure:
+        let response;
+        let attemptCount = 0;
+        const maxAttempts = 3;
+
+        // Try the API call with fallback strategies
+        while (attemptCount < maxAttempts) {
+            attemptCount++;
+            let currentInput = input;
+
+            // If this isn't the first attempt, try with fewer files
+            if (attemptCount === 2 && pdfFileIds.length > 1) {
+                console.log('🔄 Retrying with simplified approach...');
+                currentInput = createEnhancedBioInput(formData, [pdfFileIds[0]]);
+            } else if (attemptCount === 3) {
+                console.log('🔄 Final attempt with core knowledge only...');
+                currentInput = createEnhancedBioInput(formData, []);
+            }
+            // Keep button text simple throughout
+            generateBioBtn.textContent = 'Generating...';
+
+            try {
+                response = await fetch(OPENAI_RESPONSES_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${OPENAI_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-5',
+                        reasoning: { effort: 'medium' },
+                        input: currentInput,
+                        tools: [
+                            {
+                                type: "file_search",
+                                vector_store_ids: ["vs_68f837113fb481918c561f76853b87be"],
+                                max_num_results: 15
+                            }
+                        ],
+                        instructions: `You are an expert Stormlight Archive character creation agent with access to comprehensive worldbuilding materials through both uploaded files and searchable knowledge bases.
+
+🎲 CAMPAIGN CONTEXT - CRITICAL:
+- Creating Level 1 characters for the STONEWALKERS ADVENTURE campaign
+- Timeline: The EVERSTORM has NOT yet happened - this is pre-everstorm Roshar
+- Characters are brand new adventurers who have never used stormlight
+- Characters have never been approached by a Spren for a nahel bond
+- This is the traditional Roshar before the major upheavals of the later books
+
+🔍 RESEARCH METHODOLOGY:
+1. ANALYZE the provided character stats and any existing bio information
+2. SEARCH the knowledge base for relevant cultural, geographical, and social information
+3. RESEARCH character archetypes, naming conventions, and cultural practices
+4. CROSS-REFERENCE findings with uploaded reference documents
+5. SYNTHESIZE all information into a cohesive, lore-accurate character
+
+🎯 RESEARCH PRIORITIES:
+- Cultural backgrounds and customs relevant to character ancestry/location
+- Social structures, hierarchies, and occupations appropriate for Level 1 characters
+- Regional characteristics, climate, and geography  
+- Historical events that might shape the character's background (pre-everstorm)
+- Religious practices, superstitions, and beliefs
+- Language patterns, naming conventions, and cultural quirks
+- Economic systems, trade, and daily life details
+- Appropriate starting backgrounds for new adventurers
+- Moral and ethical frameworks that align with the character's alignment
+
+⚡ AGENTIC WORKFLOW:
+1. First, search for information about the character's ancestry, region, or any specified background elements
+2. Research cultural practices, social norms, and typical character archetypes for that background
+3. Look up relevant historical events, conflicts, or social issues that could inform the character's story (remembering this is pre-everstorm)
+4. Search for examples of similar characters or cultural elements in the source material
+5. Synthesize all research into authentic, detailed character elements appropriate for Level 1 adventurers
+
+🎨 CHARACTER CREATION PRINCIPLES:
+- Every detail should feel authentic to pre-everstorm Roshar's culture and magic system
+- Characters should be appropriate for Level 1 adventurers starting their journey
+- Characters have no prior experience with stormlight or spren bonds
+- Include specific cultural details that demonstrate deep knowledge of the setting
+- Create meaningful secrets and flaws that could drive interesting storylines
+- Ensure character goals and motivations align with traditional Rosharan values and conflicts
+- Remember this is the "old world" before the major changes of the everstorm
+
+IMPORTANT: Return ONLY a valid JSON object. Use your research to create rich, detailed, lore-accurate content for Level 1 Stonewalkers Adventure characters.
+
 {
-    "appearance": "detailed physical description",
-    "background": "character's history and origins", 
-    "personality": "character traits and demeanor",
-    "affiliations": "groups, organizations, or loyalties",
-    "catchphrase": "memorable saying or phrase - use single quotes for dialogue",
-    "languageQuirks": "speech patterns or linguistic habits",
-    "superstitions": "beliefs and rituals",
-    "diet": "food preferences and restrictions",
-    "secrets": "hidden aspects of the character",
-    "characterFlaws": "weaknesses and shortcomings",
-    "whatExcites": "what motivates and energizes them",
-    "dynamicGoals": "evolving objectives and ambitions",
-    "mostWant": "deepest desire or need",
-    "wontDo": "moral lines they won't cross"
+    "appearance": "detailed physical description with cultural/regional specifics",
+    "background": "comprehensive history incorporating researched cultural and historical elements", 
+    "personality": "character traits reflecting cultural background and personal experiences",
+    "affiliations": "specific organizations, groups, or loyalties based on research",
+    "catchphrase": "culturally appropriate saying reflecting character's background",
+    "languageQuirks": "speech patterns specific to region/culture/background",
+    "superstitions": "beliefs and rituals authentic to Rosharan culture",
+    "diet": "food preferences reflecting regional availability and cultural norms",
+    "secrets": "meaningful secrets that tie into broader world conflicts and lore; at least one minor and one major secret that could shape the story and/or gameplay",
+    "characterFlaws": "flaws that create interesting story potential and character growth",
+    "whatExcites": "motivations that connect to larger world themes and conflicts",
+    "dynamicGoals": "objectives that could evolve with campaign events",
+    "mostWant": "desires that reflect both personal and cultural values",
+    "wontDo": "moral boundaries shaped by cultural background and personal ethics"
 }`
-            })
-        });
+                    })
+                });
+
+                if (response.ok) {
+                    console.log(`✅ API call successful on attempt ${attemptCount}`);
+                    break;
+                } else {
+                    const errorText = await response.text();
+                    console.warn(`❌ Attempt ${attemptCount} failed: ${response.status} - ${errorText}`);
+                    if (attemptCount === maxAttempts) {
+                        throw new Error(`API request failed after ${maxAttempts} attempts: ${response.status} - ${errorText}`);
+                    }
+                }
+            } catch (error) {
+                console.error(`❌ Attempt ${attemptCount} error:`, error);
+                if (attemptCount === maxAttempts) {
+                    throw error;
+                }
+            }
+
+            // Wait a bit before retrying
+            if (attemptCount < maxAttempts) {
+                console.log('⏳ Waiting 1 second before retry...');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
 
         if (!response.ok) {
             const errorText = await response.text();
@@ -329,9 +482,11 @@ Return your response as a JSON object with the following structure:
             return;
         }
 
+        // Show completion mesds withiefly
+        generateBioBtn.textContent = 'Generated!';
+
         // Update the bio fields with AI-generated content
         updateBioFields(bioData);
-
         // Show secondary actions
         generateImageBtn.style.display = 'block';
         downloadBioBtn.style.display = 'block';
@@ -340,11 +495,27 @@ Return your response as a JSON object with the following structure:
         console.error('Error generating bio:', error);
         alert(`Error generating bio: ${error.message}`);
     } finally {
+        // Clean up progress intervals and hide indicator
+        if (generateBioBtn.dotInterval) {
+            clearInterval(generateBioBtn.dotInterval);
+            delete generateBioBtn.dotInterval;
+        }
+        if (generateBioBtn.messageInterval) {
+            clearInterval(generateBioBtn.messageInterval);
+            delete generateBioBtn.messageInterval;
+        }
+
+        // Hide progress indicator
+        const progressIndicator = document.getElementById('aiProgress');
+        if (progressIndicator) {
+            progressIndicator.style.display = 'none';
+        }
+
         // Reset button state and unlock all fields
         generateBioBtn.disabled = false;
         generateBioBtn.textContent = 'Generate Bio';
 
-        // Unlock all bio fields
+
         BIO_FIELDS.forEach(field => {
             const element = document.getElementById(field);
             if (element) {
@@ -355,12 +526,15 @@ Return your response as a JSON object with the following structure:
     }
 }
 
-// Create the input for bio generation using Responses API format
-function createBioInput(formData, pdfFileId) {
+// Create enhanced input for agentic bio generation using Responses API format
+function createEnhancedBioInput(formData, pdfFileIds) {
     const content = [
         {
             type: "input_text",
-            text: `Please generate a detailed character bio for a Stormlight TTRPG character based on the following information:
+            text: `You are an expert Stormlight Archive character creation agent. Research the knowledge base thoroughly to create an authentic, detailed Level 1 character bio for the STONEWALKERS ADVENTURE campaign based on the following information:
+
+🎲 STONEWALKERS ADVENTURE CHARACTER REQUEST:
+⚠️ IMPORTANT: This is a Level 1 character for the pre-everstorm timeline. The everstorm has NOT happened yet. Characters have no stormlight experience or spren bonds.
 
 CHARACTER SHEET:
 Player Name: ${formData.playerName || 'Not specified'}
@@ -368,6 +542,7 @@ Character Name: ${formData.characterName || 'Not specified'}
 Sex: ${formData.sex || 'Not specified'}
 Level: ${formData.level || 'Not specified'}
 Ancestry: ${formData.ancestry || 'Not specified'}
+Alignment: ${formData.alignment || 'Not specified'}
 
 Attributes:
 - Strength: ${formData.strength || 'Not specified'}
@@ -387,36 +562,50 @@ Stats:
 - Senses Range: ${formData.sensesRange || 'Not specified'}
 
 Other Details:
-- Conditions & Injuries: ${formData.conditionsInjuries || 'None'}
+- Conditions & Injuries: ${formData.conditionsInjuries || 'None specified'}
 - Expertises: ${formData.expertises || 'Not specified'}
 - Talents: ${formData.talents || 'Not specified'}
 - Weapons: ${formData.weapons || 'Not specified'}
 - Armor & Equipment: ${formData.armorEquipment || 'Not specified'}
 - Connections: ${formData.connections || 'Not specified'}
 
-EXISTING BIO (if any):
-- Appearance: ${formData.appearance || 'Please generate'}
-- Background: ${formData.background || 'Please generate'}
-- Personality: ${formData.personality || 'Please generate'}
-- Affiliations: ${formData.affiliations || 'Please generate'}
-- Catchphrase: ${formData.catchphrase || 'Please generate'}
-- Language Quirks: ${formData.languageQuirks || 'Please generate'}
-- Superstitions: ${formData.superstitions || 'Please generate'}
-- Diet: ${formData.diet || 'Please generate'}
-- Secrets: ${formData.secrets || 'Please generate'}
-- Character Flaws: ${formData.characterFlaws || 'Please generate'}
-- What Excites: ${formData.whatExcites || 'Please generate'}
-- Dynamic Goals: ${formData.dynamicGoals || 'Please generate'}
-- Most Want: ${formData.mostWant || 'Please generate'}
-- Won't Do: ${formData.wontDo || 'Please generate'}`
-        }
+🎭 EXISTING CHARACTER ELEMENTS (enhance/expand these):
+- Appearance: ${formData.appearance || 'Research and generate based on ancestry/region and Character Sheet details.'}
+- Background: ${formData.background || 'Research cultural background and create detailed history, at least 2 paragraphs long'}
+- Personality: ${formData.personality || 'Generate based on cultural norms and personal experiences'}
+- Affiliations: ${formData.affiliations || 'Research relevant organizations and create connections'}
+- Catchphrase: ${formData.catchphrase || 'Create culturally appropriate saying'}
+- Language Quirks: ${formData.languageQuirks || 'Research regional speech patterns'}
+- Superstitions: ${formData.superstitions || 'Research cultural beliefs and practices'}
+- Diet: ${formData.diet || 'Research regional food culture and preferences'}
+- Secrets: ${formData.secrets || 'Create meaningful secrets tied to world lore'}
+- Character Flaws: ${formData.characterFlaws || 'Generate flaws that create story potential'}
+- What Excites: ${formData.whatExcites || 'Connect to broader world themes and conflicts'}
+- Dynamic Goals: ${formData.dynamicGoals || 'Create goals that can evolve with campaign'}
+- Most Want: ${formData.mostWant || 'Generate desires reflecting cultural values'}
+- Won't Do: ${formData.wontDo || 'Create moral boundaries based on background'}
+
+🔍 RESEARCH INSTRUCTIONS:
+1. If ancestry is specified, research that culture's customs, appearance, and social norms
+2. If no ancestry is given, research various Rosharan cultures and select an appropriate one
+3. Look up relevant geographical regions, their characteristics, and how they shape inhabitants
+4. Research historical events, conflicts, and social issues that could inform the character's background (PRE-EVERSTORM)
+5. Find examples of naming conventions, cultural practices, and typical occupations for Level 1 adventurers
+6. Search for information about relevant organizations, religions, or social groups
+7. If alignment is specified, ensure character traits, motivations, and moral choices reflect that alignment
+8. Remember this character is just starting their adventure - no stormlight powers or spren bonds
+9. Use all research to create a character that feels authentically part of the traditional Stormlight Archive world
+
+Generate a comprehensive, research-backed Level 1 character for the Stonewalkers Adventure that demonstrates deep knowledge of pre-everstorm Roshar's cultures, history, and social structures.` }
     ];
 
-    // Add the PDF file if available
-    if (pdfFileId) {
-        content.push({
-            type: "input_file",
-            file_id: pdfFileId
+    // Add all successfully uploaded PDF files
+    if (pdfFileIds && pdfFileIds.length > 0) {
+        pdfFileIds.forEach(fileId => {
+            content.push({
+                type: "input_file",
+                file_id: fileId
+            });
         });
     }
 
@@ -597,7 +786,7 @@ async function generateImage() {
     if (!OPENAI_API_KEY) {
         await initializeAPIKey();
     }
-    
+
     if (!OPENAI_API_KEY) {
         alert('API key not configured. Please set your OpenAI API key in the script.');
         return;
@@ -665,10 +854,12 @@ async function generateImage() {
 
 // Create image generation prompt
 function createImagePrompt(formData, additionalInstructions = '', hasReference = false) {
-    let prompt = `Generate a detailed D&D-style character portrait of ${formData.characterName || 'a character'} from the world of Roshar (Stormlight Archive). ${formData.appearance || 'A person'} with ${formData.sex || 'neutral'} features. The character should be depicted in a fantasy art style similar to D&D character portraits, with rich colors and detailed clothing appropriate to the Roshar setting. The background should suggest the world of Roshar with its unique architecture and environment featuring crystalline formations and storm-carved landscapes. High quality, detailed fantasy art, professional illustration style with vibrant colors and dramatic lighting.`;
+    let prompt = `Generate a detailed D&D-style character portrait of ${formData.characterName || 'a character'} from the world of Roshar (Stormlight Archive). A person with ${formData.sex || 'neutral'} features. The character should be depicted in a fantasy art style similar to D&D character portraits, with rich colors and detailed clothing appropriate to the Roshar setting. The background should suggest the world of Roshar with its unique architecture and environment featuring crystalline formations and storm-carved landscapes. High quality, detailed fantasy art, professional illustration style with vibrant colors and dramatic lighting.
+    Appearance: ${formData.appearance}
+    `;
 
     if (additionalInstructions) {
-        prompt += ` Additional requirements: ${additionalInstructions}`;
+        prompt += ` Additional refining requirements: ${additionalInstructions}`;
     }
 
     if (hasReference) {
@@ -684,7 +875,7 @@ async function refineImage() {
     if (!OPENAI_API_KEY) {
         await initializeAPIKey();
     }
-    
+
     if (!OPENAI_API_KEY) {
         alert('API key not configured. Please set your OpenAI API key in the script.');
         return;

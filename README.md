@@ -4,7 +4,7 @@
 
 A simple web application that leverages gen AI technology to create lore-accurate character profiles for tabletop RPG campaigns set in the world of Roshar from *The Stormlight Archive*.
 
-![Character Creator Demo](https://img.shields.io/badge/Status-Production%20Ready-brightgreen) ![AI Powered](https://img.shields.io/badge/AI-GPT--5%20%7C%20DALL--E-blue) ![Framework](https://img.shields.io/badge/Framework-Vanilla%20JS-yellow)
+![Character Creator Demo](https://img.shields.io/badge/Status-Production%20Ready-brightgreen) ![AI Powered](https://img.shields.io/badge/AI-GPT--5-blue) ![Framework](https://img.shields.io/badge/Framework-Vanilla%20JS-yellow)
 
 ---
 
