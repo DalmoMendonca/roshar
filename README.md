@@ -90,6 +90,6 @@ const imageData = canvas.toDataURL('image/png'); // Lossless quality
 
 <div align="center">
 
-**[🌐 Live Demo](https://ewlcometoroshar.com)** | **[📖 Documentation](https://github.com/DalmoMendonca/roshar/wiki)** | **[🐛 Issues](https://github.com/DalmoMendonca/roshar/issues)**
+**[🌐 Live Demo](https://welcometoroshar.com)** | **[📖 Documentation](https://github.com/DalmoMendonca/roshar/wiki)** | **[🐛 Issues](https://github.com/DalmoMendonca/roshar/issues)**
 
 </div>

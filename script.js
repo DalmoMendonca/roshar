@@ -615,7 +615,7 @@ IMPORTANT: Return ONLY a valid JSON object. Use your research to create rich, de
 
         // Reset button state and unlock all fields
         generateBioBtn.disabled = false;
-        generateBioBtn.textContent = '🚀 Generate Enhanced Bio';
+        generateBioBtn.textContent = 'Generate Bio';
 
 
         BIO_FIELDS.forEach(field => {
