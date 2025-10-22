@@ -237,6 +237,56 @@ function collectFormData() {
 // Upload the Welcome to Roshar PDF (the only one under 32MB limit)
 // Note: Using pre-uploaded file ID to avoid repeated uploads
 
+// Mobile browser state management
+let isAppVisible = true;
+let generationInProgress = false;
+let currentGenerationAbortController = null;
+
+// Handle mobile app switching
+document.addEventListener('visibilitychange', () => {
+    isAppVisible = !document.hidden;
+
+    if (!isAppVisible && generationInProgress) {
+        console.log('⚠️ App backgrounded during generation - maintaining connection...');
+        // Show warning to user
+        const progressText = document.querySelector('.progress-text');
+        if (progressText) {
+            progressText.textContent = '⚠️ Keep app open - generation continues in background';
+        }
+    } else if (isAppVisible && generationInProgress) {
+        console.log('✅ App foregrounded - generation continuing...');
+        const progressText = document.querySelector('.progress-text');
+        if (progressText) {
+            progressText.textContent = 'AI Agent researching - generation resumed';
+        }
+    }
+});
+
+// Prevent mobile browser from sleeping during generation
+let wakeLock = null;
+async function requestWakeLock() {
+    try {
+        if ('wakeLock' in navigator) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            console.log('🔒 Screen wake lock acquired');
+        }
+    } catch (err) {
+        console.log('Wake lock not supported or failed:', err);
+    }
+}
+
+async function releaseWakeLock() {
+    if (wakeLock) {
+        try {
+            await wakeLock.release();
+            wakeLock = null;
+            console.log('🔓 Screen wake lock released');
+        } catch (err) {
+            console.log('Wake lock release failed:', err);
+        }
+    }
+}
+
 // Generate character bio using OpenAI Responses API
 async function generateBio() {
     // Initialize API key if not already done
@@ -249,7 +299,20 @@ async function generateBio() {
         return;
     }
 
+    // Prevent multiple simultaneous generations
+    if (generationInProgress) {
+        alert('Character generation already in progress. Please wait for it to complete.');
+        return;
+    }
+
     const formData = collectFormData();
+
+    // Set generation state
+    generationInProgress = true;
+    currentGenerationAbortController = new AbortController();
+
+    // Request wake lock to prevent mobile sleep
+    await requestWakeLock();
 
     // Show loading state and lock all fields
     generateBioBtn.disabled = true;
@@ -258,7 +321,13 @@ async function generateBio() {
     const progressIndicator = document.getElementById('aiProgress');
     const progressFill = progressIndicator.querySelector('.progress-fill');
     const progressText = progressIndicator.querySelector('.progress-text');
+    const mobileWarning = document.getElementById('mobileWarning');
     progressIndicator.style.display = 'block';
+
+    // Show mobile warning if on mobile device
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        mobileWarning.style.display = 'block';
+    }
 
     // Start progress animation with time tracking
     let progressDots = 0;
@@ -300,6 +369,17 @@ async function generateBio() {
     // Store intervals for cleanup
     generateBioBtn.dotInterval = dotInterval;
     generateBioBtn.messageInterval = messageInterval;
+
+    // Add heartbeat to keep connection alive on mobile
+    const heartbeatInterval = setInterval(() => {
+        if (generationInProgress && !document.hidden) {
+            // Send a small keepalive request
+            fetch('/favicon.ico', { method: 'HEAD' }).catch(() => { });
+        }
+    }, 30000); // Every 30 seconds
+
+    // Store heartbeat for cleanup
+    generateBioBtn.heartbeatInterval = heartbeatInterval;
 
     // Start immediately
     updateProgress();
@@ -359,6 +439,7 @@ async function generateBio() {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${OPENAI_API_KEY}`
                     },
+                    signal: currentGenerationAbortController.signal,
                     body: JSON.stringify({
                         model: 'gpt-5',
                         reasoning: { effort: 'medium' },
@@ -446,6 +527,16 @@ IMPORTANT: Return ONLY a valid JSON object. Use your research to create rich, de
                 }
             } catch (error) {
                 console.error(`❌ Attempt ${attemptCount} error:`, error);
+
+                // Handle mobile-specific errors
+                if (error.name === 'AbortError') {
+                    throw new Error('Generation was cancelled. Please try again and keep the app open.');
+                } else if (!navigator.onLine) {
+                    throw new Error('Network connection lost. Please check your internet connection and try again.');
+                } else if (error.message.includes('fetch')) {
+                    throw new Error('Network error occurred. This often happens when switching apps on mobile. Please try again and keep the app open.');
+                }
+
                 if (attemptCount === maxAttempts) {
                     throw error;
                 }
@@ -504,6 +595,10 @@ IMPORTANT: Return ONLY a valid JSON object. Use your research to create rich, de
             clearInterval(generateBioBtn.messageInterval);
             delete generateBioBtn.messageInterval;
         }
+        if (generateBioBtn.heartbeatInterval) {
+            clearInterval(generateBioBtn.heartbeatInterval);
+            delete generateBioBtn.heartbeatInterval;
+        }
 
         // Hide progress indicator
         const progressIndicator = document.getElementById('aiProgress');
@@ -511,9 +606,16 @@ IMPORTANT: Return ONLY a valid JSON object. Use your research to create rich, de
             progressIndicator.style.display = 'none';
         }
 
+        // Reset generation state
+        generationInProgress = false;
+        currentGenerationAbortController = null;
+
+        // Release wake lock
+        releaseWakeLock();
+
         // Reset button state and unlock all fields
         generateBioBtn.disabled = false;
-        generateBioBtn.textContent = 'Generate Bio';
+        generateBioBtn.textContent = '🚀 Generate Enhanced Bio';
 
 
         BIO_FIELDS.forEach(field => {
