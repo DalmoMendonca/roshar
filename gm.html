@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamemaster — Welcome to Roshar</title>
+    <meta name="robots" content="noindex">
+    <link rel="icon" href="./favicon.ico">
+    <link rel="stylesheet" href="./gm.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="gm-shell">
+        <header class="gm-header">
+            <div class="gm-header-left">
+                <h1 class="gm-title">Gamemaster</h1>
+                <p class="gm-subtitle">Party Overview &mdash; Welcome to Roshar</p>
+            </div>
+            <div class="gm-header-right">
+                <a href="/" class="gm-back-link">&larr; Character Creator</a>
+            </div>
+        </header>
+
+        <section class="gm-controls">
+            <div class="gm-control-row">
+                <button id="selectAll" type="button" class="gm-btn">Select All</button>
+                <button id="selectNone" type="button" class="gm-btn">Clear All</button>
+                <input id="searchChars" type="text" class="gm-search" placeholder="Filter characters..."
+                    aria-label="Filter characters">
+                <span id="charCount" class="gm-count"></span>
+            </div>
+            <div id="toggleList" class="gm-toggle-list" role="group" aria-label="Toggle characters"></div>
+        </section>
+
+        <div id="emptyState" class="gm-empty" style="display:none;">
+            <h2>No Characters in Party</h2>
+            <p>Go to the <a href="/">Character Creator</a>, fill out a character sheet, and click
+                <strong>Save to Party</strong> to add characters here.
+            </p>
+        </div>
+
+        <div id="noSelection" class="gm-empty" style="display:none;">
+            <h2>No Characters Selected</h2>
+            <p>Use the toggles above to select characters for comparison.</p>
+        </div>
+
+        <section class="gm-table-wrapper" id="tableWrapper">
+            <table class="gm-table" id="comparisonTable">
+                <thead id="tableHead"></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </section>
+
+        <div class="gm-footer">
+            <p>Click a stat label to sort columns. Winners highlighted in gold.</p>
+            <button id="clearParty" type="button" class="gm-btn gm-btn-danger">Clear Entire Party</button>
+        </div>
+    </div>
+
+    <script src="./gm.js"></script>
+</body>
+
+</html>
