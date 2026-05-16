@@ -125,11 +125,14 @@ BIO_FIELDS.forEach(field => {
     currentVersionIndex[field] = 0;
 });
 
+const saveToPartyBtn = document.getElementById('saveToParty');
+
 // Event listeners
 generateBioBtn.addEventListener('click', generateBio);
 generateImageBtn.addEventListener('click', generateImage);
 downloadBioBtn.addEventListener('click', downloadBio);
 refineImageBtn.addEventListener('click', refineImage);
+saveToPartyBtn.addEventListener('click', saveToParty);
 
 // Help modal functionality
 helpButton.addEventListener('click', () => {
@@ -1497,6 +1500,47 @@ function createBioDocument(formData) {
         </div>
     </body>
     </html>`;
+}
+
+// Save character to party (localStorage)
+function saveToParty() {
+    const data = collectFormData();
+
+    if (!data.characterName || !data.characterName.trim()) {
+        alert('Please enter a Character Name before saving.');
+        return;
+    }
+
+    var characters = [];
+    try {
+        characters = JSON.parse(localStorage.getItem('roshar-party-characters') || '[]');
+    } catch (e) {
+        characters = [];
+    }
+
+    var existingIdx = characters.findIndex(function (c) {
+        return c.characterName === data.characterName;
+    });
+
+    if (existingIdx !== -1) {
+        if (!confirm('"' + data.characterName + '" already exists in the party. Update their sheet?')) {
+            return;
+        }
+        data.id = characters[existingIdx].id;
+        data.savedAt = new Date().toISOString();
+        characters[existingIdx] = data;
+    } else {
+        data.id = 'char-' + Date.now();
+        data.savedAt = new Date().toISOString();
+        characters.push(data);
+    }
+
+    localStorage.setItem('roshar-party-characters', JSON.stringify(characters));
+
+    var count = characters.length;
+    saveToPartyBtn.textContent = 'Saved!';
+    setTimeout(function () { saveToPartyBtn.textContent = 'Save to Party'; }, 1500);
+    alert(data.characterName + ' saved to party! (' + count + ' character' + (count !== 1 ? 's' : '') + ' total)\n\nView your full party at /g');
 }
 
 // Add modal expansion functionality for textareas

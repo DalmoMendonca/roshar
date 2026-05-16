@@ -3,5 +3,10 @@
   publish = "."
   functions = "netlify/functions"
 
+[[redirects]]
+  from = "/g"
+  to = "/gm.html"
+  status = 200
+
 [build.environment]
   NODE_VERSION = "18"
